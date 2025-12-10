@@ -1,0 +1,18 @@
+FNOL Report - Auto Damage
+Policy Number: POL-123456
+Policyholder Name: John Doe
+Effective Dates: 01/01/2025 - 12/31/2025
+Claim Type: auto
+Incident Date: 12/05/2025
+Incident Time: 14:30
+Incident Location: 123 Main St, Springfield
+Incident Description: Rear-end collision at stop light. No fraud or staged loss noted.
+Claimant: John Doe
+Third Parties: Jane Smith (other driver)
+Contact Details: john.doe@example.com, (555) 123-4567
+Asset Type: Vehicle
+Asset ID: VIN 1HGBH41JXMN109186
+Estimated Damage: $12,500
+Initial Estimate: $12,500
+Attachments: photos, police report
+

@@ -1,0 +1,18 @@
+FNOL Report - Injury
+Policy Number: POL-789101
+Policyholder Name: Acme Manufacturing
+Effective Dates: 03/01/2025 to 03/01/2026
+Claim Type: injury
+Incident Date: 11/28/2025
+Incident Time: 09:05 AM
+Incident Location: Warehouse 7, Dock B
+Incident Description: Employee slipped on wet floor and reported back pain. No indication of fraud.
+Claimant: Robert Taylor
+Third Parties: none
+Contact Details: safety@acme.com, 555-222-1010
+Asset Type: Facility
+Asset ID: Dock-B
+Estimated Damage: $40,000
+Initial Estimate: $42,000
+Attachments: incident photos, supervisor statement, medical note
+

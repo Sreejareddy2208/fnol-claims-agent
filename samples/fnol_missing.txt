@@ -1,0 +1,14 @@
+FNOL Report - Investigation Flag
+Policy Number: POL-555666
+Policyholder Name: Bright Rentals
+Claim Type: auto
+Incident Date: 12/01/2025
+Incident Location: 77 Sunset Blvd, Los Angeles, CA
+Incident Description: Claimant mentioned the collision may have been staged; stories from witnesses are inconsistent.
+Claimant: Alex Rivera
+Contact Details: alex.rivera@bright.com
+Asset Type: Vehicle
+Asset ID: TRK-9021
+Estimated Damage: $18,000
+Attachments: photos only
+

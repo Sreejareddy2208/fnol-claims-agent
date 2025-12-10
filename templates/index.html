@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNOL Claims Processing Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .file-input-button:hover {
+            background: #764ba2;
+        }
+
+        .text-input-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .process-button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .process-button:hover:not(:disabled) {
+            background: #764ba2;
+        }
+
+        .process-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .route-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .route-fast-track {
+            background: #4caf50;
+            color: white;
+        }
+
+        .route-manual-review {
+            background: #ff9800;
+            color: white;
+        }
+
+        .route-investigation {
+            background: #f44336;
+            color: white;
+        }
+
+        .route-specialist-queue {
+            background: #2196f3;
+            color: white;
+        }
+
+        .route-standard-review {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .reasoning {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .field-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+            font-size: 0.9em;
+        }
+
+        .field-value {
+            color: #333;
+            word-break: break-word;
+        }
+
+        .field-value.null {
+            color: #999;
+            font-style: italic;
+        }
+
+        .missing-fields {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .missing-fields h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .missing-field-tag {
+            display: inline-block;
+            background: #ffc107;
+            color: #856404;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 5px 0 0;
+            font-size: 0.9em;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .file-name {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 FNOL Claims Processing Agent</h1>
+            <p>Upload a First Notice of Loss document to extract fields and get routing recommendations</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section" id="uploadSection">
+                <h2 style="margin-bottom: 20px; color: #333;">Upload Document</h2>
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".txt,.pdf">
+                    <label for="fileInput" class="file-input-button">
+                        📄 Choose File (PDF or TXT)
+                    </label>
+                </div>
+                <p style="margin-top: 15px; color: #666;">or drag and drop your file here</p>
+                <p id="fileName" style="margin-top: 10px; color: #667eea; font-weight: 600;"></p>
+            </div>
+
+            <div class="text-input-section">
+                <h2 style="margin-bottom: 15px; color: #333;">Or Paste Text Content</h2>
+                <textarea id="textInput" placeholder="Paste FNOL document text here..."></textarea>
+            </div>
+
+            <button class="process-button" id="processButton" onclick="processDocument()">
+                Process Document
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Processing document...</p>
+            </div>
+
+            <div id="errorMessage" class="error" style="display: none;"></div>
+
+            <div class="results" id="results">
+                <div class="file-name" id="resultFileName"></div>
+                <div id="routeBadge"></div>
+                <div id="reasoning"></div>
+                <div id="missingFields"></div>
+                <h3 class="section-title">Extracted Fields</h3>
+                <div class="fields-grid" id="fieldsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const textInput = document.getElementById('textInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const fileName = document.getElementById('fileName');
+        const processButton = document.getElementById('processButton');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Drag and drop handlers
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileName.textContent = `Selected: ${files[0].name}`;
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = `Selected: ${e.target.files[0].name}`;
+            }
+        });
+
+        async function processDocument() {
+            const file = fileInput.files[0];
+            const text = textInput.value.trim();
+
+            if (!file && !text) {
+                showError('Please upload a file or paste text content.');
+                return;
+            }
+
+            // Reset UI
+            hideError();
+            results.classList.remove('active');
+            loading.classList.add('active');
+            processButton.disabled = true;
+
+            try {
+                let result;
+                if (file) {
+                    result = await processFile(file);
+                } else {
+                    result = await processText(text);
+                }
+                displayResults(result);
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                loading.classList.remove('active');
+                processButton.disabled = false;
+            }
+        }
+
+        async function processFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/process', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to process file');
+            }
+
+            return await response.json();
+        }
+
+        async function processText(text) {
+            const response = await fetch('/api/process-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to process text');
+            }
+
+            return await response.json();
+        }
+
+        function displayResults(result) {
+            results.classList.add('active');
+            
+            // File name
+            document.getElementById('resultFileName').textContent = `File: ${result.file || 'Text Input'}`;
+
+            // Route badge
+            const routeBadge = document.getElementById('routeBadge');
+            const route = result.recommendedRoute.toLowerCase().replace(/\s+/g, '-');
+            routeBadge.innerHTML = `<div class="route-badge route-${route}">${result.recommendedRoute}</div>`;
+
+            // Reasoning
+            const reasoningDiv = document.getElementById('reasoning');
+            reasoningDiv.innerHTML = `<div class="reasoning"><strong>Reasoning:</strong> ${result.reasoning}</div>`;
+
+            // Missing fields
+            const missingFieldsDiv = document.getElementById('missingFields');
+            if (result.missingFields && result.missingFields.length > 0) {
+                missingFieldsDiv.innerHTML = `
+                    <div class="missing-fields">
+                        <h3>⚠️ Missing Mandatory Fields</h3>
+                        ${result.missingFields.map(field => 
+                            `<span class="missing-field-tag">${field.replace(/_/g, ' ')}</span>`
+                        ).join('')}
+                    </div>
+                `;
+            } else {
+                missingFieldsDiv.innerHTML = '';
+            }
+
+            // Extracted fields
+            const fieldsGrid = document.getElementById('fieldsGrid');
+            const fields = result.extractedFields || {};
+            fieldsGrid.innerHTML = '';
+
+            const fieldLabels = {
+                policy_number: 'Policy Number',
+                policyholder_name: 'Policyholder Name',
+                effective_dates: 'Effective Dates',
+                incident_date: 'Incident Date',
+                incident_time: 'Incident Time',
+                incident_location: 'Incident Location',
+                incident_description: 'Incident Description',
+                claimant: 'Claimant',
+                third_parties: 'Third Parties',
+                contact_details: 'Contact Details',
+                asset_type: 'Asset Type',
+                asset_id: 'Asset ID',
+                estimated_damage: 'Estimated Damage',
+                claim_type: 'Claim Type',
+                attachments: 'Attachments',
+                initial_estimate: 'Initial Estimate',
+                inconsistencies: 'Inconsistencies'
+            };
+
+            for (const [key, value] of Object.entries(fields)) {
+                if (key === 'inconsistencies' && (!value || value.length === 0)) {
+                    continue;
+                }
+
+                const label = fieldLabels[key] || key.replace(/_/g, ' ');
+                let displayValue = value;
+
+                if (value === null || value === undefined) {
+                    displayValue = 'Not provided';
+                } else if (Array.isArray(value)) {
+                    displayValue = value.length > 0 ? value.join(', ') : 'None';
+                } else if (typeof value === 'number') {
+                    displayValue = value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                } else if (typeof value === 'string' && value.trim() === '') {
+                    displayValue = 'Not provided';
+                }
+
+                const fieldCard = document.createElement('div');
+                fieldCard.className = 'field-card';
+                fieldCard.innerHTML = `
+                    <div class="field-label">${label}</div>
+                    <div class="field-value ${value === null || value === undefined ? 'null' : ''}">${displayValue}</div>
+                `;
+                fieldsGrid.appendChild(fieldCard);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
